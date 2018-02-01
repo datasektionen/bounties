@@ -20,11 +20,9 @@ fs.open('./index.html', 'r', function(err, fileToRead){
     }
 });
 
-var index_template = Handlebars.compile(source);
 
 app.get('/', function (req, res) {
-    output = Handlebar.
-	res.send(index_template({body : "Potatis"}))
+    res.send(index_template({body : "Potatis"}))
 
 })
 
