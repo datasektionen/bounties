@@ -36,7 +36,8 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.get('/', function(req, res) {
     var pool = new Pool();
 
-    pool.query("SELECT (id, title, content, time_created, time_done) FROM bounties ORDER BY time_created DESC", [],
+    pool.query(`SELECT (id, title, content, time_created, time_done)
+		FROM bounties ORDER BY time_created DESC`, [],
 	       (err, res) => {
 		   if(err) {
 		       console.log("Error whilst creating bounty:" , err.stack)
@@ -55,7 +56,8 @@ app.get('/', function(req, res) {
 app.post('/add-post', function(req,res) {
     var pool = new Pool();
     pool.query(
-	'INSERT INTO bounties (title, content, time_created) VALUES ($1,$2,$3) RETURNING id'
+	`INSERT INTO bounties (title, content, time_created)
+	 VALUES ($1,$2,$3) RETURNING id`
 	, [req.body.title, req.body.content, new Date()],
 	(err, res) => {
 	    console.log("Created a new bounty id = ", res)
@@ -82,15 +84,14 @@ app.post('/mark-as-done', function(req,res){
 	console.log("Couln't connect to the database")
 	throw err
     }
-    pool.query(" CREATE TABLE IF NOT EXISTS bounties(
-
+    pool.query(`CREATE TABLE IF NOT EXISTS bounties(
 		       id INT PRIMARY KEY NOT NULL,
 		       title TEXT NOT NULL,
 		       content TEXT NOT NULL,
 		       time_created  TEXT NOT NULL,
 		       time_done TEXT
 
-		 );", [] ,
+		 );`, [] ,
 	       (err,res) =>
 	       console.log("Ran creation query"))
 }
