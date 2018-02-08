@@ -36,32 +36,40 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.get('/', function(req, res) {
     var pool = new Pool();
 
-    var res  = pool.query("SELECT (id, title, content, time_created, time_done) FROM bounties ORDER BY time_created DESC");
-    objects = []
-    res.forEach( r => objects.push({ 'id': r[0],
-				     'title': r[1],
-				     'content': r[2],
-				     'time_created': r[3],
-				     'time_done' : r[4]
-				     }));
-    res.send(index_template({posts : objects}))
-})
+    pool.query("SELECT (id, title, content, time_created, time_done) FROM bounties ORDER BY time_created DESC", [],
+	       (err, res) => {
+		   if(err) {
+		       console.log("Error whilst creating bounty:" , err.stack)
+		       return
+		   }
+		   objects = []
+		   res.forEach( r => objects.push({ 'id': r[0],
+						    'title': r[1],
+						    'content': r[2],
+						    'time_created': r[3],
+						    'time_done' : r[4]
+						  }));
+		   res.send(index_template({posts : objects}))
+	       })
 
 app.post('/add-post', function(req,res) {
     var pool = new Pool();
-    var res = await pool.query(
+    pool.query(
 	'INSERT INTO bounties (title, content, time_created) VALUES ($1,$2,$3) RETURNING id'
-	, [req.body.title, req.body.content, new Date()])
-
-    console.log("Created a new bounty id = ", res)
-    pool.end()
-    console.log(req.body)
+	, [req.body.title, req.body.content, new Date()],
+	(err, res) => {
+	    console.log("Created a new bounty id = ", res)
+	    pool.end()
+	    console.log(req.body)
+	})
 })
 
 app.post('/mark-as-done', function(req,res){
     var pool = new Pool();
-    var res = await pool.query('UPDATE bounties SET time_done = $2 WHERE id = $2)', [req.body.id, new Date()])
-    pool.end()
+    pool.query('UPDATE bounties SET time_done = $2 WHERE id = $2)', [req.body.id, new Date()],
+	       (err,res) => {
+		   pool.end()
+	       })
     res.redirect('/')
 })
 
@@ -82,8 +90,9 @@ app.post('/mark-as-done', function(req,res){
 		       time_created  TEXT NOT NULL,
 		       time_done TEXT
 
-		 );")
-    console.log("Ran creation query")
+		 );", [] ,
+	       (err,res) =>
+	       console.log("Ran creation query"))
 }
 
 app.listen(5000)
