@@ -1,8 +1,43 @@
 <html>
   <head>
-    <title></title>
+    <title>Bounties for datasektionen</title>
+    <link hreff='https://aurora.datasektionen.se/'/>
   </head>
+  <script type='application/js'>
+
+  </script>
   <body>
-   {{body}}
+    <div class='new_bounty'>
+      <form method='POST' action='/add-post'>
+	<h3>
+	  Title
+	</h3>
+	<input name='title' type='text' />
+
+	<h3>
+	  Content
+	</h3>
+	<textfield name='content'>
+
+	</textfield>
+	<input type='submit' value='Add bounty' />
+      </form>
+    </div>
+    {{#posts}}
+    <div class='post'>
+      <div class='post_title'>
+	{{title}}
+      </div>
+      <div class='post_content'>
+	{{content}}
+      </div>
+      <div class='post_footer'>
+	<form action='/mark-as-done' method='post'>
+	  <input type='number' value='{{id}}' style='display:hidden;'/>
+	  <input type='submit' value='Mark as done'/>
+	</form>
+      </div>
+    </div>
+    {{/posts}}
   </body>
 </html>
