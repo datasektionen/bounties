@@ -34,9 +34,9 @@ fs.open('./index.html', 'r', function(err, fileToRead){
 app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/', function(req, res) {
-    const pool = new Pool();
+    var pool = new Pool();
 
-    const res  = pool.query("SELECT (id, title, content, time_created, time_done) FROM bounties ORDER BY time_created DESC");
+    var res  = pool.query("SELECT (id, title, content, time_created, time_done) FROM bounties ORDER BY time_created DESC");
     objects = []
     res.forEach( r => objects.push({ 'id': r[0],
 				     'title': r[1],
@@ -48,8 +48,8 @@ app.get('/', function(req, res) {
 })
 
 app.post('/add-post', function(req,res) {
-    const pool = new Pool();
-    const res = await pool.query(
+    var pool = new Pool();
+    var res = await pool.query(
 	'INSERT INTO bounties (title, content, time_created) VALUES ($1,$2,$3) RETURNING id'
 	, [req.body.title, req.body.content, new Date()])
 
@@ -59,8 +59,8 @@ app.post('/add-post', function(req,res) {
 })
 
 app.post('/mark-as-done', function(req,res){
-    const pool = new Pool();
-    const res = await pool.query('UPDATE bounties SET time_done = $2 WHERE id = $2)', [req.body.id, new Date()])
+    var pool = new Pool();
+    var res = await pool.query('UPDATE bounties SET time_done = $2 WHERE id = $2)', [req.body.id, new Date()])
     pool.end()
     res.redirect('/')
 })
