@@ -31,27 +31,28 @@ fs.open('./index.html', 'r', function(err, fileToRead){
     }
 });
 
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', function(req, res) {
     var pool = new Pool();
 
     pool.query(`SELECT (id, title, content, time_created, time_done)
 		FROM bounties ORDER BY time_created DESC`, [],
-	       (err, res) => {
+	       (err, dbRes) => {
 		   if(err) {
 		       console.log("Error whilst creating bounty:" , err.stack)
 		       return
 		   }
 		   objects = []
-		   res.forEach( r => objects.push({ 'id': r[0],
-						    'title': r[1],
-						    'content': r[2],
-						    'time_created': r[3],
-						    'time_done' : r[4]
-						  }));
+		   dbRes.rows.forEach( r => objects.push({ 'id': r[0],
+							   'title': r[1],
+							   'content': r[2],
+							   'time_created': r[3],
+							   'time_done' : r[4]
+							 }));
 		   res.send(index_template({posts : objects}))
 	       })
+})
 
 app.post('/add-post', function(req,res) {
     var pool = new Pool();
@@ -59,10 +60,13 @@ app.post('/add-post', function(req,res) {
 	`INSERT INTO bounties (title, content, time_created)
 	 VALUES ($1,$2,$3) RETURNING id`
 	, [req.body.title, req.body.content, new Date()],
-	(err, res) => {
+	(err, dbRes) => {
 	    console.log("Created a new bounty id = ", res)
 	    pool.end()
+
 	    console.log(req.body)
+
+	    res.send()
 	})
 })
 
@@ -81,19 +85,24 @@ app.post('/mark-as-done', function(req,res){
     try  {
 	pool = new Pool()
     } catch(err){
-	console.log("Couln't connect to the database")
-	throw err
+	console.log("Couln't connect to the database",  err.stack);
+	throw err;
     }
     pool.query(`CREATE TABLE IF NOT EXISTS bounties(
-		       id INT PRIMARY KEY NOT NULL,
+		       id BIGSERIAL PRIMARY KEY NOT NULL,
 		       title TEXT NOT NULL,
 		       content TEXT NOT NULL,
 		       time_created  TEXT NOT NULL,
 		       time_done TEXT
 
 		 );`, [] ,
-	       (err,res) =>
-	       console.log("Ran creation query"))
+	       (err,res) =>{
+		   if(err){
+		       console.error("Couldn't create db", err)
+
+		   }
+		   console.log("Ran creation query")
+	       })
 }
 
 app.listen(5000)
