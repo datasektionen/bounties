@@ -1,14 +1,17 @@
 var express = require('express')
 var Handlebars = require('handlebars');
+var bodyParser = require("body-parser");
 var fs = require('fs')
 var app = express()
+
+const { Pool, Client } = require('pg')
 
 var index_source   = ""
 var index_template
 
 var test_post = {title : "Test title",
 		 content : "Test content",
-		 time_uploaded: new Date(),
+		 time_created: new Date(),
 		 time_done  : null,
 		 id : 1 }
 
@@ -28,17 +31,59 @@ fs.open('./index.html', 'r', function(err, fileToRead){
     }
 });
 
+app.use(bodyParser.urlencoded({ extended: false }));
 
 app.get('/', function(req, res) {
-    res.send(index_template({posts : [test_post]}))
+    const pool = new Pool();
+
+    const res  = pool.query("SELECT (id, title, content, time_created, time_done) FROM bounties ORDER BY time_created DESC");
+    objects = []
+    res.forEach( r => objects.push({ 'id': r[0],
+				     'title': r[1],
+				     'content': r[2],
+				     'time_created': r[3],
+				     'time_done' : r[4]
+				     }));
+    res.send(index_template({posts : objects}))
 })
 
 app.post('/add-post', function(req,res) {
-    console.log(req)
+    const pool = new Pool();
+    const res = await pool.query(
+	'INSERT INTO bounties (title, content, time_created) VALUES ($1,$2,$3) RETURNING id'
+	, [req.body.title, req.body.content, new Date()])
+
+    console.log("Created a new bounty id = ", res)
+    pool.end()
+    console.log(req.body)
 })
 
 app.post('/mark-as-done', function(req,res){
-    console.log(req)
+    const pool = new Pool();
+    const res = await pool.query('UPDATE bounties SET time_done = $2 WHERE id = $2)', [req.body.id, new Date()])
+    pool.end()
+    res.redirect('/')
 })
+
+
+{
+    var pool;
+    try  {
+	pool = new Pool()
+    } catch(err){
+	console.log("Couln't connect to the database")
+	throw err
+    }
+    pool.query(" CREATE TABLE IF NOT EXISTS bounties(
+
+		       id INT PRIMARY KEY NOT NULL,
+		       title TEXT NOT NULL,
+		       content TEXT NOT NULL,
+		       time_created  TEXT NOT NULL,
+		       time_done TEXT
+
+		 );")
+    console.log("Ran creation query")
+}
 
 app.listen(5000)

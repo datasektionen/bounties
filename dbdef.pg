@@ -1,0 +1,7 @@
+CREATE TABLE bounties (
+       id INT PRIMARY KEY NOT NULL,
+       title TEXT NOT NULL,
+       content TEXT NOT NULL,
+       time_created  TEXT NOT NULL,
+       time_done TEXT
+);

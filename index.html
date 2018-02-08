@@ -1,43 +1,45 @@
 <html>
   <head>
     <title>Bounties for datasektionen</title>
-    <link hreff='https://aurora.datasektionen.se/'/>
+    <link rel="stylesheet" type="text/css" href='https://aurora.datasektionen.se/'/>
   </head>
   <script type='application/js'>
 
   </script>
   <body>
-    <div class='new_bounty'>
-      <form method='POST' action='/add-post'>
-	<h3>
-	  Title
-	</h3>
-	<input name='title' type='text' />
+    <div id='content'>
+      <div class='new_bounty'>
+	<form method='POST' action='/add-post'>
+	  <h3>
+	    Title
+	  </h3>
+	  <input name='title' type='text' />
 
-	<h3>
-	  Content
-	</h3>
-	<textfield name='content'>
+	  <h3>
+	    Content
+	  </h3>
+	  <textarea name='content'>
 
-	</textfield>
-	<input type='submit' value='Add bounty' />
-      </form>
-    </div>
-    {{#posts}}
-    <div class='post'>
-      <div class='post_title'>
-	{{title}}
-      </div>
-      <div class='post_content'>
-	{{content}}
-      </div>
-      <div class='post_footer'>
-	<form action='/mark-as-done' method='post'>
-	  <input type='number' value='{{id}}' style='display:hidden;'/>
-	  <input type='submit' value='Mark as done'/>
+	  </textarea>
+	  <input type='submit' value='Add bounty' />
 	</form>
       </div>
+      {{#posts}}
+      <div class='post'>
+	<div class='post_title'>
+	  {{title}}
+	</div>
+	<div class='post_content'>
+	  {{content}}
+	</div>
+	<div class='post_footer'>
+	  <form action='/mark-as-done' method='post'>
+	    <input name='id' type='number' value='{{id}}' style='display:none;'/>
+	    <input type='submit' value='Mark as done'/>
+	  </form>
+	</div>
+      </div>
+      {{/posts}}
     </div>
-    {{/posts}}
   </body>
 </html>
